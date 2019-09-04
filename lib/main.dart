@@ -1,6 +1,7 @@
+import 'dart:io';
 import 'package:firebase_app/note.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:core';
 import 'package:toast/toast.dart';
@@ -38,7 +39,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final databaseReference = FirebaseDatabase.instance.reference();
+  final Firestore databaseReference = Firestore.instance;
   int noteId;
   final myController = TextEditingController();
 
@@ -88,8 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: Text("Submit"),
                                         onPressed:() {
 
-                                        runMyFuture();
-                                        Toast.show("Note saved", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+                                        _createRecord();
                                         Navigator.of(context, rootNavigator: true).pop();}),
                                   ],
                                 )),
@@ -119,26 +119,23 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future createRecord() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    noteId = (prefs.getInt('noteId') ?? 0);
-    noteId++;
-    if(noteId!=0)
-      {
-        databaseReference.child(noteId.toString()).set({
-          'Created': DateTime.now().toString(),
-          'description': myController.text,
-          'title': "Note "+noteId.toString(),
-        });
-        prefs.setInt('noteId', noteId);
-      }
-  }
+    void _createRecord()
+    {
+      databaseReference.collection("users").document("userid0").collection("Notes").getDocuments().then((databaseSnapshot) {
+          noteId = databaseSnapshot.documents.length;
+      });
+      print(noteId);
+      noteId++;
+      Map<String,String> data = <String,String>{
+        "title": "Note"+noteId.toString(),
+        "desc":myController.text
+      };
 
-  void runMyFuture() {
-    createRecord().then((value) {
-      // Run extra code here
-    }, onError: (error) {
-      print(error);
-    });
-  }
+      databaseReference.collection("users").document("userid0").collection("Notes").document("Note "+noteId.toString()).setData(data).whenComplete(() {
+          Toast.show("Note saved", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+      }).catchError((e) => print(e));
+
+
+    }
+
 }
