@@ -39,9 +39,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final Firestore databaseReference = Firestore.instance;
-  int noteId;
+
   final myController = TextEditingController();
+
 
   void dispose() {
     // Clean up the controller when the widget is disposed.
@@ -70,30 +70,30 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: 400.0 * a1.value, // USE PROVIDED ANIMATION
                             width: 300.0 * a1.value,
                             child: Scaffold(body: Container(
-                                child: Center(child: Column(
-                                  children: <Widget>[
-                                    Text("Subject",style: TextStyle(fontSize: 20),),
-                                    Text("Type",style: TextStyle(fontSize: 20),),
-                                    Container(
-                                      color: Color(0xffeeeeee),
-                                      child: TextField(
-                                        controller: myController,
-                                        maxLines: null,
-                                        decoration: new InputDecoration(
-                                          border: InputBorder.none,
-                                          hintText: 'Add your description here',
-                                        ),
+                              child: Center(child: Column(
+                                children: <Widget>[
+                                  Text("Subject",style: TextStyle(fontSize: 20),),
+                                  Text("Type",style: TextStyle(fontSize: 20),),
+                                  Container(
+                                    color: Color(0xffeeeeee),
+                                    child: TextField(
+                                      controller: myController,
+                                      maxLines: null,
+                                      decoration: new InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: 'Add your description here',
                                       ),
                                     ),
-                                    RaisedButton(
+                                  ),
+                                  RaisedButton(
                                       child: Text("Submit"),
-                                        onPressed:() {
-
-                                        _createRecord();
+                                      onPressed:() {
+                                        //Pass relevant arguments to the function
+                                        //note().addNote(context,subcode,subname,userid,notetype,myController.text);
                                         Navigator.of(context, rootNavigator: true).pop();}),
-                                  ],
-                                )),
-                              ),),
+                                ],
+                              )),
+                            ),),
                           ),
                         );
                       },
@@ -119,23 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-    void _createRecord()
-    {
-      databaseReference.collection("users").document("userid0").collection("Notes").getDocuments().then((databaseSnapshot) {
-          noteId = databaseSnapshot.documents.length;
-      });
-      print(noteId);
-      noteId++;
-      Map<String,String> data = <String,String>{
-        "title": "Note"+noteId.toString(),
-        "desc":myController.text
-      };
-
-      databaseReference.collection("users").document("userid0").collection("Notes").document("Note "+noteId.toString()).setData(data).whenComplete(() {
-          Toast.show("Note saved", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-      }).catchError((e) => print(e));
 
 
-    }
 
 }
