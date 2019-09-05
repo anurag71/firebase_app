@@ -63,6 +63,17 @@ class note {
       "desc":description,
       "is_updated":DateTime.now().toString()
     };
-    docRef.updateData(update);
+    docRef.updateData(update).whenComplete(() {
+      Toast.show("Note updated", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+    }).catchError((e) => print(e));
+  }
+
+  void deleteNote(docRef, context){
+    Map<String,String> delete = <String,String>{
+      "is_deleted": "true"
+    };
+    docRef.updateData(delete).whenComplete(() {
+      Toast.show("Note deleted", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+    }).catchError((e) => print(e));
   }
 }
